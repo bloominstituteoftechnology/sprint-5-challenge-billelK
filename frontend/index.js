@@ -3,18 +3,19 @@ async function sprintChallenge5() { // Note the async keyword, in case you wish 
 
   const footer = document.querySelector('footer')
   const currentYear = new Date().getFullYear()
-  footer.textContent = `© BLOOM INSTITUTE OF TECHNOLOGY ${currentYear}`
+  footer.textContent = `© BLOOM INSTITUTE OF TECHNOLOGY ${currentYear - 1}`
 
   const learnersPromise = await axios.get("http://localhost:3003/api/learners")
   const mentorsPromise = await axios.get("http://localhost:3003/api/mentors")
   
   Promise.all([learnersPromise, mentorsPromise])
     .then (res => {
-      const infoP = document.querySelector(".info").textContent = "No learner is selected"
-
       let learnersArray = res[0].data
       let mentorsArray = res[1].data
 
+      
+      document.querySelector(".info").textContent = "No learner is selected"
+        
       learnersArray.forEach(learnerObj => {
         let learnerMents = learnerObj.mentors
         for (let i = 0; i < learnerMents.length; i++) {
@@ -59,23 +60,44 @@ async function sprintChallenge5() { // Note the async keyword, in case you wish 
               mentorFullname.textContent = mentor
               mentorsList.appendChild(mentorFullname)
             })
-      
+
+        
+
       card.addEventListener("click", () => {
         let selectedCards = document.querySelectorAll(".selected")
-        document.querySelector(".info").textContent = "No learner is selected".textContent = `The selected learner is ${learner.fullName}`
+        document.querySelector(".info").textContent = `The selected learner is ${learner.fullName}`
 
+        let currentCardTitle = card.querySelectorAll("h3")
+        if (!card.classList.contains("selected")) {
+          currentCardTitle.textContent +=`, ID ${learner.id}`
+        } else {
+          currentCardTitle.textContent = learner.fullName
+        }
+        
         card.classList.toggle("selected")
         
         selectedCards.forEach(card => {
           card.classList.remove("selected")
+          currentCardTitle.textContent = learner.fullName
         })
 
-
+        if (document.querySelectorAll(".selected").length === 0) {
+          document.querySelector(".info").textContent = "No learner is selected"
+        }   
       })
 
-      mentorsTitle.addEventListener("click", () => {
-        mentorsTitle.classList.toggle("open")
-        document.querySelector(".card h4.closed ~ ul").style.display = "block"
+      mentorsTitle.addEventListener("click", (e) => {
+        if (mentorsTitle.classList.contains("closed")) {
+          mentorsTitle.classList.remove("closed")
+          mentorsTitle.classList.add("open")
+        } else {
+          mentorsTitle.classList.remove("open")
+          mentorsTitle.classList.add("closed")
+        }
+        
+        if (mentorsTitle.parentElement.classList.contains("selected")) {
+          e.stopPropagation()
+        }
       })
       // console.log(cardsDiv);
     }
